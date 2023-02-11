@@ -13,7 +13,7 @@ async function listContacts() {
     const fileData = await fs.readFile(contactsPath, { encoding });
     return fileData ? JSON.parse(fileData) : [];
   } catch (err) {
-    return err.message;
+    throw new Error(err.message);
   }
 }
 
@@ -23,13 +23,24 @@ async function listContacts() {
  * @returns {Promise} Fulfills with the single contact data
  */
 async function getContactById(contactId) {
+  if (contactId === '' || contactId === undefined) {
+    throw new Error('Contact id should not be empty');
+  }
+
   try {
-    const contacts = await listContacts();
-    return contacts
-      .filter(({ id }) => Number(id) === Number(contactId))
-      .shift();
+    const contactsList = await listContacts();
+
+    const filteredContacts = contactsList.filter(
+      ({ id }) => Number(id) === Number(contactId)
+    );
+
+    if (!filteredContacts.length) {
+      throw new Error(`Contact with ID - "${contactId}", was not found.`);
+    }
+
+    return filteredContacts[0];
   } catch (err) {
-    return err.message;
+    throw new Error(err.message);
   }
 }
 
@@ -41,24 +52,17 @@ async function getContactById(contactId) {
 async function removeContact(contactId) {
   try {
     const contact = await getContactById(contactId);
-
-    if (!contact) {
-      return Promise.reject(`Contact with ID - "${contactId}", was not found.`);
-    }
-
     const contactsList = await listContacts();
+
     const filteredContacts = contactsList.filter(
-      ({ id }) => Number(id) !== Number(contactId)
+      ({ id }) => Number(id) !== Number(contact.id)
     );
 
-    const res = await fs.writeFile(
-      contactsPath,
-      JSON.stringify(filteredContacts)
-    );
+    await fs.writeFile(contactsPath, JSON.stringify(filteredContacts));
 
-    return contactId;
+    return contact.id;
   } catch (err) {
-    return err.message;
+    throw new Error(err.message);
   }
 }
 
@@ -71,15 +75,15 @@ async function removeContact(contactId) {
  */
 async function addContact(name, email, phone) {
   if (name === '' || name === undefined) {
-    return Promise.reject('Contact name should not be empty');
+    throw new Error('Contact name should not be empty');
   }
 
   if (email === '' || email === undefined) {
-    return Promise.reject('Contact email should not be empty');
+    throw new Error('Contact email should not be empty');
   }
 
   if (phone === '' || phone === undefined) {
-    return Promise.reject('Contact phone should not be empty');
+    throw new Error('Contact phone should not be empty');
   }
 
   try {
@@ -99,7 +103,7 @@ async function addContact(name, email, phone) {
 
     return newContact;
   } catch (err) {
-    return err.message;
+    throw new Error(err.message);
   }
 }
 
