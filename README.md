@@ -1,4 +1,4 @@
-# FSon56 > NodeJS > Module 1
+# Contacts CLI
 
 ## Available commands:
 
