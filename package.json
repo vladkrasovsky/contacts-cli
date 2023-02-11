@@ -20,5 +20,8 @@
   "homepage": "https://github.com/vladkrasovsky/contacts-cli#readme",
   "devDependencies": {
     "nodemon": "^2.0.20"
+  },
+  "dependencies": {
+    "yargs": "^17.6.2"
   }
 }
